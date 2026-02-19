@@ -84,7 +84,7 @@ export default function MqttSwitch({ client, label, defaultCmdTopic, defaultStat
             style={{ 
               width: '100%', boxSizing: 'border-box', fontSize: '13px', padding: '8px 12px',
               border: '1px solid #cbd5e1', borderRadius: '6px', fontFamily: 'monospace',
-              backgroundColor: '#f8fafc', transition: 'border-color 0.2s'
+              backgroundColor: '#f8fafc', color: '#1e293b', transition: 'border-color 0.2s'
             }}
             onFocus={(e) => {e.target.style.borderColor = '#0284c7'}}
             onBlur={(e) => {e.target.style.borderColor = '#cbd5e1'}}
@@ -99,7 +99,7 @@ export default function MqttSwitch({ client, label, defaultCmdTopic, defaultStat
             style={{ 
               width: '100%', boxSizing: 'border-box', fontSize: '13px', padding: '8px 12px',
               border: '1px solid #cbd5e1', borderRadius: '6px', fontFamily: 'monospace',
-              backgroundColor: '#f8fafc', transition: 'border-color 0.2s'
+              backgroundColor: '#f8fafc', color: '#1e293b', transition: 'border-color 0.2s'
             }}
             onFocus={(e) => {e.target.style.borderColor = '#0284c7'}}
             onBlur={(e) => {e.target.style.borderColor = '#cbd5e1'}}
