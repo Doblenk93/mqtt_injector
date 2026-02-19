@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import mqtt from 'mqtt';
 import { type MqttSettings } from '../types';
@@ -6,39 +6,35 @@ import { type MqttSettings } from '../types';
 export default function SettingsPage() {
   const navigate = useNavigate();
   
-  const [host, setHost] = useState('wss://mqtt.domainanda.com/mqtt');
-  const [useAuth, setUseAuth] = useState(false);
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [isTesting, setIsTesting] = useState(false);
-  const [message, setMessage] = useState({ text: '', type: '' });
-  const [clientId, setClientId] = useState('');
-
-  useEffect(() => {
-    // Coba ambil dari localStorage dulu kalau sudah pernah seting
+  // Initialize settings dari localStorage untuk menghindari multiple setState calls
+  const initializeSettings = () => {
     const saved = localStorage.getItem('mqtt_settings');
     if (saved) {
-      const parsed: MqttSettings = JSON.parse(saved);
-      setHost(parsed.host);
-      setClientId(parsed.clientId);
-      setUseAuth(parsed.useAuth);
-      if (parsed.username) setUsername(parsed.username);
-      if (parsed.password) setPassword(parsed.password);
-    } else {
-      setClientId(`mqtt_sim_${Math.random().toString(16).slice(2, 8)}`);
+      return JSON.parse(saved);
     }
-  }, []);
+    return {
+      host: 'wss://mqtt.domainanda.com/mqtt',
+      useAuth: false,
+      username: '',
+      password: '',
+      clientId: `mqtt_sim_${Math.random().toString(16).slice(2, 8)}`
+    };
+  };
+
+  const [settings, setSettings] = useState<MqttSettings>(initializeSettings);
+  const [isTesting, setIsTesting] = useState(false);
+  const [message, setMessage] = useState({ text: '', type: '' });
 
   const handleTestConnection = (e: React.MouseEvent) => {
     e.preventDefault();
     setIsTesting(true);
     setMessage({ text: 'Menguji koneksi...', type: 'info' });
 
-    const options: mqtt.IClientOptions = { clientId, connectTimeout: 5000 };
-    if (useAuth) { options.username = username; options.password = password; }
+    const options: mqtt.IClientOptions = { clientId: settings.clientId, connectTimeout: 5000 };
+    if (settings.useAuth) { options.username = settings.username; options.password = settings.password; }
 
     try {
-      const client = mqtt.connect(host, options);
+      const client = mqtt.connect(settings.host, options);
       client.on('connect', () => {
         setMessage({ text: '✅ Koneksi Berhasil!', type: 'success' });
         client.end(true); 
@@ -49,20 +45,24 @@ export default function SettingsPage() {
         client.end(true);
         setIsTesting(false);
       });
-    } catch (err: any) {
-      setMessage({ text: `❌ URL Host tidak valid: ${err.message}`, type: 'error' });
+    } catch (err) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const error = err as any;
+      setMessage({ text: `❌ URL Host tidak valid: ${error.message}`, type: 'error' });
       setIsTesting(false);
     }
   };
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
-    const settings: MqttSettings = {
-      host, useAuth, clientId,
-      username: useAuth ? username : undefined,
-      password: useAuth ? password : undefined,
+    const settingsToSave: MqttSettings = {
+      host: settings.host,
+      useAuth: settings.useAuth,
+      clientId: settings.clientId,
+      username: settings.useAuth ? settings.username : undefined,
+      password: settings.useAuth ? settings.password : undefined,
     };
-    localStorage.setItem('mqtt_settings', JSON.stringify(settings));
+    localStorage.setItem('mqtt_settings', JSON.stringify(settingsToSave));
     navigate('/dashboard');
   };
 
@@ -89,28 +89,28 @@ export default function SettingsPage() {
         <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
           <div>
             <label style={labelStyle}>Host URL (WebSocket)</label>
-            <input type="text" value={host} onChange={(e) => setHost(e.target.value)} required style={inputStyle} placeholder="wss://broker.anda.com/mqtt" />
+            <input type="text" value={settings.host} onChange={(e) => setSettings({ ...settings, host: e.target.value })} required style={inputStyle} placeholder="wss://broker.anda.com/mqtt" />
           </div>
 
           <div>
             <label style={labelStyle}>Client ID</label>
-            <input type="text" value={clientId} onChange={(e) => setClientId(e.target.value)} required style={inputStyle} />
+            <input type="text" value={settings.clientId} onChange={(e) => setSettings({ ...settings, clientId: e.target.value })} required style={inputStyle} />
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px', backgroundColor: '#f9fafb', borderRadius: '6px', border: '1px solid #e5e7eb' }}>
-            <input type="checkbox" id="authCheck" checked={useAuth} onChange={(e) => setUseAuth(e.target.checked)} style={{ width: '16px', height: '16px', cursor: 'pointer' }} />
+            <input type="checkbox" id="authCheck" checked={settings.useAuth} onChange={(e) => setSettings({ ...settings, useAuth: e.target.checked })} style={{ width: '16px', height: '16px', cursor: 'pointer' }} />
             <label htmlFor="authCheck" style={{ fontSize: '14px', cursor: 'pointer', color: '#374151', fontWeight: '500' }}>Gunakan Username & Password</label>
           </div>
 
-          {useAuth && (
+          {settings.useAuth && (
             <div style={{ display: 'flex', gap: '15px' }}>
               <div style={{ flex: 1 }}>
                 <label style={labelStyle}>Username</label>
-                <input type="text" value={username} onChange={(e) => setUsername(e.target.value)} style={inputStyle} />
+                <input type="text" value={settings.username} onChange={(e) => setSettings({ ...settings, username: e.target.value })} style={inputStyle} />
               </div>
               <div style={{ flex: 1 }}>
                 <label style={labelStyle}>Password</label>
-                <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} style={inputStyle} />
+                <input type="password" value={settings.password} onChange={(e) => setSettings({ ...settings, password: e.target.value })} style={inputStyle} />
               </div>
             </div>
           )}

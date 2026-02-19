@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import mqtt from 'mqtt';
 
 interface DataInjectorProps {
@@ -168,7 +168,7 @@ export default function DataInjector({ client, defaultTopic = 'sensor/suhu' }: D
             <label style={{ fontSize: '12px', display: 'block', fontWeight: '500', color: '#64748b', marginBottom: '6px' }}>Tipe Filter:</label>
             <select 
               value={filterType} 
-              onChange={e => setFilterType(e.target.value as any)} 
+              onChange={e => setFilterType(e.target.value as 'none' | 'moving_average' | 'kalman')} 
               disabled={isActive} 
               style={{ 
                 width: '100%', boxSizing: 'border-box', padding: '8px 12px', fontSize: '13px',

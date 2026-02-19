@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import mqtt from 'mqtt';
 
 interface MqttSwitchProps {
@@ -111,12 +111,12 @@ export default function MqttSwitch({ client, label, defaultCmdTopic, defaultStat
         onClick={handleToggle} 
         disabled={isLoading}
         style={{
-          padding: '12px 20px', fontSize: '15px', fontWeight: '600', marginTop: '8px',
+          padding: '12px 20px', fontSize: '14px', fontWeight: '600', marginTop: '8px',
           cursor: isLoading ? 'not-allowed' : 'pointer',
           backgroundColor: isLoading ? '#fbbf24' : (isOn ? '#10b981' : '#ef4444'),
           color: '#ffffff', border: 'none', borderRadius: '8px',
           transition: 'all 0.3s', opacity: isLoading ? 0.8 : 1,
-          textTransform: 'uppercase', letterSpacing: '0.5px', fontSize: '14px'
+          textTransform: 'uppercase', letterSpacing: '0.5px'
         }}
         onMouseOver={(e) => {
           if (!isLoading) {
